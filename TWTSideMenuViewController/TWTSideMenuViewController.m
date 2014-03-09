@@ -61,12 +61,32 @@ static NSTimeInterval const kDefaultSwapAnimationClosedDuration = 0.35;
     return self;
 }
 
+- (id)initWithMenuViewController:(UIViewController *)menuViewController rightMenuViewController:(UIViewController *)rightMenuViewController mainViewController:(UIViewController *)mainViewController
+{
+    self = [super initWithNibName:nil bundle:nil];
+    if (self) {
+        _menuViewController = menuViewController;
+        _rightMenuViewController = rightMenuViewController;
+        _mainViewController = mainViewController;
+
+        [self commonInitialization];
+    }
+    return self;
+}
+
 - (void)commonInitialization
 {
     self.animationDuration = kDefaultAnimationDuration;
     self.animationType = TWTSideMenuAnimationTypeSlideOver;
-    
-    [self addViewController:self.menuViewController];
+
+    if (self.menuViewController) {
+        [self addViewController:self.menuViewController];
+    }
+
+    if (self.rightMenuViewController) {
+        [self addViewController:self.rightMenuViewController];
+    }
+
     [self addViewController:self.mainViewController];
 }
 
@@ -85,11 +105,19 @@ static NSTimeInterval const kDefaultSwapAnimationClosedDuration = 0.35;
     [self.view addSubview:self.containerView];
     [self.mainViewController didMoveToParentViewController:self];
 
-    [self addChildViewController:self.menuViewController];
-    [self.view insertSubview:self.menuViewController.view belowSubview:self.containerView];
-    [self.menuViewController didMoveToParentViewController:self];
+    if (self.menuViewController) {
+        [self addChildViewController:self.menuViewController];
+        [self.view insertSubview:self.menuViewController.view belowSubview:self.containerView];
+        [self.menuViewController didMoveToParentViewController:self];
+        [self updateMenuViewWithTransform:[self closeTransformForMenuView]];
+    }
 
-    [self updateMenuViewWithTransform:[self closeTransformForMenuView]];
+    if (self.rightMenuViewController) {
+        [self addChildViewController:self.rightMenuViewController];
+        [self.view insertSubview:self.rightMenuViewController.view belowSubview:self.containerView];
+        [self.rightMenuViewController didMoveToParentViewController:self];
+        [self updateRightMenuViewWithTransform:[self closeTransformForRightMenuView]];
+    }
 }
 
 - (BOOL)shouldAutorotate
@@ -109,31 +137,54 @@ static NSTimeInterval const kDefaultSwapAnimationClosedDuration = 0.35;
     if (self.open) {
         [self removeOverlayButtonFromMainViewController];
 
-        [UIView animateWithDuration:duration animations:^{
-            // Effectively closes the menu and reapplies transform. This is a half measure to get around the problem of new view controllers getting pushed on to the hierarchy without the proper height navigation.
-            self.menuViewController.view.transform = [self closeTransformForMenuView];
-            self.containerView.transform = CGAffineTransformIdentity;
-        } completion:^(BOOL finished) {
-            self.menuViewController.view.center = (CGPoint) { CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds) };
-            self.menuViewController.view.bounds = self.view.bounds;
-        }];
-    } else {
-        [self updateMenuViewWithTransform:CGAffineTransformIdentity];
+        if (self.menuViewController && !self.menuViewController.view.hidden) {
+            [UIView animateWithDuration:duration animations:^{
+                // Effectively closes the menu and reapplies transform. This is a half measure to get around the problem of new view controllers getting pushed on to the hierarchy without the proper height navigation.
+                self.menuViewController.view.transform = [self closeTransformForMenuView];
+                self.containerView.transform = CGAffineTransformIdentity;
+            } completion:^(BOOL finished) {
+                self.menuViewController.view.center = (CGPoint) { CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds) };
+                self.menuViewController.view.bounds = self.view.bounds;
+            }];
+        }
+        else {
+            [UIView animateWithDuration:duration animations:^{
+                // Effectively closes the menu and reapplies transform. This is a half measure to get around the problem of new view controllers getting pushed on to the hierarchy without the proper height navigation.
+                self.rightMenuViewController.view.transform = [self closeTransformForRightMenuView];
+                self.containerView.transform = CGAffineTransformIdentity;
+            } completion:^(BOOL finished) {
+                self.rightMenuViewController.view.center = (CGPoint) { CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds) };
+                self.rightMenuViewController.view.bounds = self.view.bounds;
+            }];
+        }
+    } else  {
+        if (self.menuViewController) {
+            [self updateMenuViewWithTransform:CGAffineTransformIdentity];
+        }
+        if (self.rightMenuViewController) {
+            [self updateRightMenuViewWithTransform:CGAffineTransformIdentity];
+        }
     }
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
     if (self.open) {
+        UIViewController *viewController = self.menuViewController && !self.menuViewController.view.hidden ? self.menuViewController : self.rightMenuViewController;
         [UIView animateWithDuration:0.2 animations:^{
-            self.menuViewController.view.transform = CGAffineTransformIdentity;
+            viewController.view.transform = CGAffineTransformIdentity;
             self.containerView.transform = [self openTransformForView:self.containerView];
         } completion:^(BOOL finished) {
             [self addShadowToViewController:self.mainViewController];
             [self addOverlayButtonToMainViewController];
         }];
     } else {
-        [self updateMenuViewWithTransform:CGAffineTransformIdentity];
+        if (self.menuViewController) {
+            [self updateMenuViewWithTransform:CGAffineTransformIdentity];
+        }
+        if (self.rightMenuViewController) {
+            [self updateRightMenuViewWithTransform:CGAffineTransformIdentity];
+        }
         [self addShadowToViewController:self.mainViewController];
     }
 }
@@ -151,7 +202,11 @@ static NSTimeInterval const kDefaultSwapAnimationClosedDuration = 0.35;
 - (UIViewController *)childViewControllerForStatusBarStyle
 {
     if (self.open) {
-        return self.menuViewController;
+        if (self.menuViewController && !self.menuViewController.view.hidden) {
+            return self.menuViewController;
+        } else {
+            return self.rightMenuViewController;
+        }
     } else {
         return self.mainViewController;
     }
@@ -160,7 +215,11 @@ static NSTimeInterval const kDefaultSwapAnimationClosedDuration = 0.35;
 - (UIViewController *)childViewControllerForStatusBarHidden
 {
     if (self.open) {
-        return self.menuViewController;
+        if (self.menuViewController && !self.menuViewController.view.hidden) {
+            return self.menuViewController;
+        } else {
+            return self.rightMenuViewController;
+        }
     } else {
         return self.mainViewController;
     }
@@ -182,11 +241,25 @@ static NSTimeInterval const kDefaultSwapAnimationClosedDuration = 0.35;
     self.menuViewController.view.bounds = self.view.bounds;
 }
 
+- (void)updateRightMenuViewWithTransform:(CGAffineTransform)transform
+{
+    self.rightMenuViewController.view.transform = transform;
+    self.rightMenuViewController.view.center = (CGPoint) { CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds) };
+    self.rightMenuViewController.view.bounds = self.view.bounds;
+}
+
 - (CGAffineTransform)closeTransformForMenuView
 {
     CGFloat transformSize = 1.0f / self.zoomScale;
     CGAffineTransform transform = CGAffineTransformScale(self.menuViewController.view.transform, transformSize, transformSize);
     return CGAffineTransformTranslate(transform, -(CGRectGetMidX(self.view.bounds)) - self.edgeOffset.horizontal, -self.edgeOffset.vertical);
+}
+
+- (CGAffineTransform)closeTransformForRightMenuView
+{
+    CGFloat transformSize = 1.0f / self.zoomScale;
+    CGAffineTransform transform = CGAffineTransformScale(self.rightMenuViewController.view.transform, transformSize, transformSize);
+    return CGAffineTransformTranslate(transform, (CGRectGetMidX(self.view.bounds)) + self.edgeOffset.horizontal, -self.edgeOffset.vertical);
 }
 
 - (CGAffineTransform)openTransformForView:(UIView *)view
@@ -196,11 +269,24 @@ static NSTimeInterval const kDefaultSwapAnimationClosedDuration = 0.35;
     return CGAffineTransformScale(newTransform, transformSize, transformSize);
 }
 
+- (CGAffineTransform)openTransformForRightView:(UIView *)view
+{
+    CGFloat transformSize = self.zoomScale;
+    CGAffineTransform newTransform = CGAffineTransformTranslate(view.transform, -CGRectGetMidX(view.bounds) - self.edgeOffset.horizontal, self.edgeOffset.vertical);
+    return CGAffineTransformScale(newTransform, transformSize, transformSize);
+}
+
 - (void)openMenuAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion
 {
     if (self.open) {
         return;
     }
+
+    if (self.rightMenuViewController) {
+        self.rightMenuViewController.view.hidden = YES;
+    }
+
+    self.menuViewController.view.hidden = NO;
     
     if ([self.delegate respondsToSelector:@selector(sideMenuViewControllerWillOpenMenu:)]) {
 	    [self.delegate sideMenuViewControllerWillOpenMenu:self];
@@ -290,6 +376,106 @@ static NSTimeInterval const kDefaultSwapAnimationClosedDuration = 0.35;
     }
 }
 
+- (void)openRightMenuAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion
+{
+    if (self.open) {
+        return;
+    }
+
+    if (self.menuViewController) {
+        self.menuViewController.view.hidden = YES;
+    }
+
+    self.rightMenuViewController.view.hidden = NO;
+
+    if ([self.delegate respondsToSelector:@selector(sideMenuViewControllerWillOpenRightMenu:)]) {
+        [self.delegate sideMenuViewControllerWillOpenRightMenu:self];
+    }
+
+    self.open = YES;
+    self.rightMenuViewController.view.transform = [self closeTransformForRightMenuView];
+
+    void (^openMenuBlock)(void) = ^{
+        self.rightMenuViewController.view.transform = CGAffineTransformIdentity;// [self openTransformForRightMenuView];
+        self.containerView.transform = [self openTransformForRightView:self.containerView];
+    };
+
+    void (^openCompleteBlock)(BOOL) = ^(BOOL finished) {
+        if (finished) {
+            [self addOverlayButtonToMainViewController];
+        }
+
+        if ([self.delegate respondsToSelector:@selector(sideMenuViewControllerDidOpenRightMenu:)]) {
+            [self.delegate sideMenuViewControllerDidOpenRightMenu:self];
+        }
+
+        if (completion) {
+            completion(finished);
+        }
+    };
+
+    [self addShadowToViewController:self.mainViewController];
+
+    if (animated) {
+        [UIView animateWithDuration:self.animationDuration
+                              delay:0.0
+                            options:UIViewAnimationOptionCurveEaseInOut
+                         animations:openMenuBlock
+                         completion:openCompleteBlock];
+    } else {
+        openMenuBlock();
+        openCompleteBlock(YES);
+    }
+
+    [self updateStatusBarStyle];
+}
+
+- (void)closeRightMenuAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion
+{
+    if (!self.open) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(sideMenuViewControllerWillCloseRightMenu:)]) {
+        [self.delegate sideMenuViewControllerWillCloseRightMenu:self];
+    }
+
+    self.open = NO;
+
+    [self removeOverlayButtonFromMainViewController];
+
+    void (^closeMenuBlock)(void) = ^{
+        self.rightMenuViewController.view.transform = [self closeTransformForRightMenuView];
+        self.containerView.transform = CGAffineTransformIdentity;
+    };
+
+    void (^closeCompleteBlock)(BOOL) = ^(BOOL finished) {
+        if (finished) {
+            [self updateStatusBarStyle];
+        }
+        self.rightMenuViewController.view.transform = CGAffineTransformIdentity;
+
+        if ([self.delegate respondsToSelector:@selector(sideMenuViewControllerDidCloseRightMenu:)]) {
+            [self.delegate sideMenuViewControllerDidCloseRightMenu:self];
+        }
+
+        if (completion) {
+            completion(finished);
+        }
+    };
+
+    if (animated) {
+        [UIView animateWithDuration:self.animationDuration
+                              delay:0.0
+                            options:UIViewAnimationOptionCurveEaseInOut
+                         animations:closeMenuBlock
+                         completion:closeCompleteBlock];
+    } else {
+        closeMenuBlock();
+        closeCompleteBlock(YES);
+    }
+}
+
 - (void)toggleMenuAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion
 {
     if (self.open) {
@@ -330,7 +516,8 @@ static NSTimeInterval const kDefaultSwapAnimationClosedDuration = 0.35;
     UIViewAnimationOptions options = UIViewAnimationOptionCurveEaseInOut;
     switch (self.animationType) {
         case TWTSideMenuAnimationTypeSlideOver: {
-            CGFloat outgoingStartX = CGRectGetMaxX(outgoingViewController.view.frame);
+            CGFloat outgoingStartX = self.menuViewController && !self.menuViewController.view.hidden ?
+                    CGRectGetMaxX(outgoingViewController.view.frame) : -CGRectGetMaxX(outgoingViewController.view.frame);
 
             incomingViewController.view.transform = CGAffineTransformTranslate(incomingViewController.view.transform, outgoingStartX, 0.0f);
             break;
@@ -367,7 +554,11 @@ static NSTimeInterval const kDefaultSwapAnimationClosedDuration = 0.35;
     
     if (animated) {
         if (closeMenu) {
-            [self closeMenuAnimated:animated completion:nil];
+            if (self.menuViewController && !self.menuViewController.view.hidden) {
+                [self closeMenuAnimated:animated completion:nil];
+            } else {
+                [self closeRightMenuAnimated:animated completion:nil];
+            }
         }
         
         [UIView animateWithDuration:changeTimeInterval
@@ -442,7 +633,12 @@ static NSTimeInterval const kDefaultSwapAnimationClosedDuration = 0.35;
 
 - (void)closeButtonTouchUpInside
 {
-    [self closeMenuAnimated:YES completion:nil];
+    if (self.menuViewController && !self.menuViewController.view.hidden) {
+        [self closeMenuAnimated:YES completion:nil];
+    }
+    else {
+        [self closeRightMenuAnimated:YES completion:nil];
+    }
 }
 
 - (void)closeButtonTouchedDown

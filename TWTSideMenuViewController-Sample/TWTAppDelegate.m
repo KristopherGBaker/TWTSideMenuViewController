@@ -9,6 +9,7 @@
 #import "TWTAppDelegate.h"
 #import "TWTMenuViewController.h"
 #import "TWTMainViewController.h"
+#import "TWTRightMenuViewController.h"
 
 #import "TWTSideMenuViewController.h"
 
@@ -17,6 +18,7 @@
 @property (nonatomic, strong) TWTSideMenuViewController *sideMenuViewController;
 @property (nonatomic, strong) TWTMenuViewController *menuViewController;
 @property (nonatomic, strong) TWTMainViewController *mainViewController;
+@property (nonatomic, strong) TWTRightMenuViewController *rightMenuViewController;
 
 @end
 
@@ -28,8 +30,9 @@
 
     self.menuViewController = [[TWTMenuViewController alloc] initWithNibName:nil bundle:nil];
     self.mainViewController = [[TWTMainViewController alloc] initWithNibName:nil bundle:nil];
-    
-    self.sideMenuViewController = [[TWTSideMenuViewController alloc] initWithMenuViewController:self.menuViewController mainViewController:[[UINavigationController alloc] initWithRootViewController:self.mainViewController]];
+    self.rightMenuViewController = [[TWTRightMenuViewController alloc] initWithNibName:nil bundle:nil];
+
+    self.sideMenuViewController = [[TWTSideMenuViewController alloc] initWithMenuViewController:self.menuViewController rightMenuViewController:self.rightMenuViewController mainViewController:[[UINavigationController alloc] initWithRootViewController:self.mainViewController]];
     self.sideMenuViewController.shadowColor = [UIColor blackColor];
     self.sideMenuViewController.edgeOffset = (UIOffset) { .horizontal = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 18.0f : 0.0f };
     self.sideMenuViewController.zoomScale = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? 0.5634f : 0.85f;

@@ -26,6 +26,9 @@ static NSString * const kTableViewCellIdentifier = @"com.twotoasters.sampleCell"
     
     UIBarButtonItem *openItem = [[UIBarButtonItem alloc] initWithTitle:@"Open" style:UIBarButtonItemStylePlain target:self action:@selector(openButtonPressed)];
     self.navigationItem.leftBarButtonItem = openItem;
+
+    UIBarButtonItem *openRightItem = [[UIBarButtonItem alloc] initWithTitle:@"Open" style:UIBarButtonItemStylePlain target:self action:@selector(openRightButtonPressed)];
+    self.navigationItem.rightBarButtonItem = openRightItem;
     
     [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:kTableViewCellIdentifier];
 }
@@ -33,6 +36,11 @@ static NSString * const kTableViewCellIdentifier = @"com.twotoasters.sampleCell"
 - (void)openButtonPressed
 {
     [self.sideMenuViewController openMenuAnimated:YES completion:nil];
+}
+
+- (void)openRightButtonPressed
+{
+    [self.sideMenuViewController openRightMenuAnimated:YES completion:nil];
 }
 
 #pragma mark - UITableViewDelegate & UITableViewDataSource

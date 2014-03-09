@@ -23,6 +23,7 @@
 		A4CBEDF518890683000A1EB1 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A4485E6717BBCA75002B32C4 /* UIKit.framework */; };
 		A4CBEDFB18890683000A1EB1 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A4CBEDF918890683000A1EB1 /* InfoPlist.strings */; };
 		A4CBEDFD18890683000A1EB1 /* TWTSideMenuViewControllerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A4CBEDFC18890683000A1EB1 /* TWTSideMenuViewControllerTests.m */; };
+		D4055EF94B095272A07869D7 /* TWTRightMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D40552A28DEE0F89E51DB8CD /* TWTRightMenuViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,8 @@
 		A4CBEDFA18890683000A1EB1 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A4CBEDFC18890683000A1EB1 /* TWTSideMenuViewControllerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TWTSideMenuViewControllerTests.m; sourceTree = "<group>"; };
 		A4CBEDFE18890683000A1EB1 /* TWTSideMenuViewController-Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TWTSideMenuViewController-Tests-Prefix.pch"; sourceTree = "<group>"; };
+		D405501679455B7C84D547E8 /* TWTRightMenuViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TWTRightMenuViewController.h; sourceTree = "<group>"; };
+		D40552A28DEE0F89E51DB8CD /* TWTRightMenuViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TWTRightMenuViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -129,6 +132,8 @@
 				A495C4D817BC109F00B880E4 /* TWTMainViewController.h */,
 				A495C4D917BC109F00B880E4 /* TWTMainViewController.m */,
 				A4485E6A17BBCA75002B32C4 /* Supporting Files */,
+				D405501679455B7C84D547E8 /* TWTRightMenuViewController.h */,
+				D40552A28DEE0F89E51DB8CD /* TWTRightMenuViewController.m */,
 			);
 			path = "TWTSideMenuViewController-Sample";
 			sourceTree = "<group>";
@@ -274,6 +279,7 @@
 				A4485E7017BBCA75002B32C4 /* main.m in Sources */,
 				A45D359417BBDF6B00BEF872 /* TWTSideMenuViewController.m in Sources */,
 				A495C4D717BC109600B880E4 /* TWTMenuViewController.m in Sources */,
+				D4055EF94B095272A07869D7 /* TWTRightMenuViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

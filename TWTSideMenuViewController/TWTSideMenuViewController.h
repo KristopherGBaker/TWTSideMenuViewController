@@ -30,6 +30,10 @@
 - (void)sideMenuViewControllerDidOpenMenu:(TWTSideMenuViewController *)sideMenuViewController;
 - (void)sideMenuViewControllerWillCloseMenu:(TWTSideMenuViewController *)sideMenuViewController;
 - (void)sideMenuViewControllerDidCloseMenu:(TWTSideMenuViewController *)sideMenuViewController;
+- (void)sideMenuViewControllerWillOpenRightMenu:(TWTSideMenuViewController *)sideMenuViewController;
+- (void)sideMenuViewControllerDidOpenRightMenu:(TWTSideMenuViewController *)sideMenuViewController;
+- (void)sideMenuViewControllerWillCloseRightMenu:(TWTSideMenuViewController *)sideMenuViewController;
+- (void)sideMenuViewControllerDidCloseRightMenu:(TWTSideMenuViewController *)sideMenuViewController;
 @end
 
 @interface TWTSideMenuViewController : UIViewController
@@ -63,6 +67,8 @@ typedef NS_ENUM(NSInteger, TWTSideMenuAnimationType) {
 /** Left side menu view */
 @property (nonatomic, strong) IBOutlet UIViewController *menuViewController;
 
+@property (nonatomic, strong) IBOutlet UIViewController *rightMenuViewController;
+
 /** Main View */
 @property (nonatomic, strong) IBOutlet UIViewController *mainViewController;
 
@@ -79,6 +85,8 @@ typedef NS_ENUM(NSInteger, TWTSideMenuAnimationType) {
  */
 - (id)initWithMenuViewController:(UIViewController *)menuViewController mainViewController:(UIViewController *)mainViewController;
 
+- (id)initWithMenuViewController:(UIViewController *)menuViewController rightMenuViewController:(UIViewController *)rightMenuViewController mainViewController:(UIViewController *)mainViewController;
+
 @end
 
 @interface TWTSideMenuViewController (MenuActions)
@@ -92,6 +100,10 @@ typedef NS_ENUM(NSInteger, TWTSideMenuAnimationType) {
  @param animated Is the menu close action animated
  */
 - (void)closeMenuAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion;
+
+- (void)openRightMenuAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion;
+
+- (void)closeRightMenuAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion;
 
 /** Toggle the state of the left side menu
  @param animated Is the toggle action animated
